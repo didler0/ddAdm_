@@ -1,0 +1,58 @@
+USE PC;
+
+-- Заполнение таблицы basic_info
+INSERT INTO basic_info (ip, network_name, place_of_installation, description, last_status, data_status, last_repair)
+VALUES
+    ('192.168.1.1', 'Workstation1', 'Office A', 'Main workstation', 'Online', '2023-01-15', '2023-02-20'),
+    ('192.168.1.2', 'Workstation2', 'Office B', 'Secondary workstation', 'Offline', '2023-02-10', '2023-03-25'),
+    ('192.168.1.3', 'Server1', 'Datacenter', 'Main server', 'Online', '2023-01-20', '2023-04-02'),
+    ('192.168.1.4', 'Printer1', 'Office C', 'Color laser printer', 'Offline', '2023-02-05', '2023-03-10'),
+    ('192.168.1.5', 'Laptop1', 'Mobile', 'Sales representative laptop', 'Online', '2023-02-01', '2023-03-20'),
+    ('192.168.1.6', 'Scanner1', 'Office D', 'Document scanner', 'Offline', '2023-02-15', '2023-03-30'),
+    ('192.168.1.7', 'Workstation3', 'Office E', 'Finance workstation', 'Online', '2023-01-10', '2023-04-05'),
+    ('192.168.1.8', 'Workstation4', 'Office F', 'Development workstation', 'Online', '2023-02-28', '2023-04-10'),
+    ('192.168.1.9', 'Tablet1', 'Mobile', 'Executive tablet', 'Online', '2023-02-10', '2023-03-15'),
+    ('192.168.1.10', 'Projector1', 'Conference room', 'Presentation projector', 'Offline', '2023-01-25', '2023-04-20');
+
+-- Заполнение таблицы detail_info
+INSERT INTO detail_info (basic_info_id, detailed_information, inventory_number, serial_number, mac_address, wake_on_lan, vnc_password)
+VALUES
+    (1, 'Workstation for general tasks', 'INV12345', 'SN12345', '00:11:22:33:44:55', 'Enabled', 'vncpass1'),
+    (2, 'Backup workstation', 'INV54321', 'SN54321', '00:11:22:33:44:56', 'Disabled', NULL),
+    (3, 'Main data storage server', 'INV67890', 'SN67890', '00:11:22:33:44:57', 'Enabled', 'vncpass2'),
+    (4, 'High-speed color printer', 'INVABCDE', 'SNABCDE', '00:11:22:33:44:58', 'Disabled', NULL),
+    (5, 'Portable laptop for sales', 'INVFGHIJ', 'SNFGHIJ', '00:11:22:33:44:59', 'Enabled', 'vncpass3'),
+    (6, 'Document scanning device', 'INVXYZ01', 'SNXYZ01', '00:11:22:33:44:60', 'Disabled', NULL),
+    (7, 'Finance department workstation', 'INV123ABC', 'SN123ABC', '00:11:22:33:44:61', 'Enabled', 'vncpass4'),
+    (8, 'Development environment', 'INV456DEF', 'SN456DEF', '00:11:22:33:44:62', 'Enabled', 'vncpass5'),
+    (9, 'Executive tablet for meetings', 'INV789GHI', 'SN789GHI', '00:11:22:33:44:63', 'Enabled', 'vncpass6'),
+    (10, 'Presentation equipment', 'INV101112', 'SN101112', '00:11:22:33:44:64', 'Disabled', NULL);
+
+-- Заполнение таблицы status
+INSERT INTO statuses (basic_info_id, status_, status_date)
+VALUES
+    (1, 'Online', '2023-02-24 08:00:00'),
+    (2, 'Offline', '2023-02-24 09:30:00'),
+    (3, 'Online', '2023-02-24 10:45:00'),
+    (4, 'Offline', '2023-02-24 11:15:00'),
+    (5, 'Online', '2023-02-24 13:20:00'),
+    (6, 'Offline', '2023-02-24 14:10:00'),
+    (7, 'Online', '2023-02-24 15:00:00'),
+    (8, 'Online', '2023-02-24 16:30:00'),
+    (9, 'Online', '2023-02-24 17:45:00'),
+    (10, 'Offline', '2023-02-24 18:15:00');
+
+
+-- Заполнение таблицы repairs
+INSERT INTO repairs (basic_info_id, description, repair_date, document_path)
+VALUES
+    (1, 'Replaced faulty RAM module', '2023-01-30', 'C:\Documents\Repair1.pdf'),
+    (2, 'Reinstalled operating system', '2023-03-05', 'C:\Documents\Repair2.pdf'),
+    (3, 'Upgraded storage capacity', '2023-04-10', 'C:\Documents\Repair3.pdf'),
+    (4, 'Replaced toner cartridge', '2023-03-15', 'C:\Documents\Repair4.pdf'),
+    (5, 'Updated antivirus software', '2023-03-25', 'C:\Documents\Repair5.pdf'),
+    (6, 'Cleaned scanner glass', '2023-04-01', 'C:\Documents\Repair6.pdf'),
+    (7, 'Installed accounting software', '2023-04-10', 'C:\Documents\Repair7.pdf'),
+    (8, 'Updated development IDE', '2023-04-15', 'C:\Documents\Repair8.pdf'),
+    (9, 'Replaced broken screen', '2023-03-20', 'C:\Documents\Repair9.pdf'),
+    (10, 'Replaced projector lamp', '2023-04-20', 'C:\Documents\Repair10.pdf');

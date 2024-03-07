@@ -1,0 +1,45 @@
+USE PC;
+
+
+
+-- Create basic_info table
+CREATE TABLE basic_info (
+    id INT PRIMARY KEY IDENTITY,
+    ip VARCHAR(50),
+    network_name VARCHAR(100),
+    place_of_installation VARCHAR(100),
+    description VARCHAR(MAX),
+    foto VARBINARY(MAX),
+    last_status VARCHAR(50),
+    data_status DATE,
+    last_repair DATE
+);
+
+-- Create detail_info table
+CREATE TABLE detail_info (
+    id INT PRIMARY KEY IDENTITY,
+    basic_info_id INT FOREIGN KEY REFERENCES basic_info(id),
+    detailed_information VARCHAR(MAX),
+    inventory_number VARCHAR(50),
+    serial_number VARCHAR(50),
+    mac_address VARCHAR(50),
+    wake_on_lan VARCHAR(50),
+    vnc_password VARCHAR(50) -- Assuming password is stored encrypted
+);
+
+-- Create status table
+CREATE TABLE statuses (
+    id INT PRIMARY KEY IDENTITY,
+    basic_info_id INT FOREIGN KEY REFERENCES basic_info(id),
+    status_ VARCHAR(50),
+    status_date DATETIME
+);
+
+-- Create repairs table
+CREATE TABLE repairs (
+    id INT PRIMARY KEY IDENTITY,
+    basic_info_id INT FOREIGN KEY REFERENCES basic_info(id),
+    description VARCHAR(MAX),
+    repair_date DATE,
+    document_path VARCHAR(MAX) -- Assuming paths to documents are stored
+);
