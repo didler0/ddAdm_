@@ -6,6 +6,7 @@ from editPc import *
 from PhotoViewer import *
 from repairs import *
 from Description import *
+from Report import *
 from datetime import datetime
 import concurrent.futures
 import os
@@ -32,46 +33,27 @@ class UpperFrame(customtkinter.CTkFrame):
             master=self, text="Добавить ПК", command=lambda: self.AddPc())
         self.AddPcButton.grid(row=0, column=0, pady=10,
                               padx=10)
-        #
-        #
+
         self.EditPcButton = customtkinter.CTkButton(
             master=self, text="Редактировать данные о ПК", command=lambda: self.EditPc())
         self.EditPcButton.grid(row=0, column=1, pady=10,
                                padx=10)
-        #
-        #
+
         self.ExportPcButton = customtkinter.CTkButton(
             master=self, text="Отчет данных", command=lambda: self.ExportPc())
         self.ExportPcButton.grid(
             row=0, column=2, pady=10, padx=10)
-        #
-        #
-        #
-        #
-        #
+
         self.ReloadDataButton = customtkinter.CTkButton(
             master=self, text="Обновить", command=lambda: self.downInstance.destroy_and_recreate())
         self.ReloadDataButton.grid(
             row=0, column=3, pady=10, padx=10)
-        #
-        #
-        #
-        #
-        #
-        self.FilterButton = customtkinter.CTkButton(
-            master=self, text="Фильтрация", command=lambda: self.FilterPc())
-        self.FilterButton.grid(
-            row=0, column=4, pady=10, padx=10)
-        #
-        #
-        #
+
         self.RepairsButton = customtkinter.CTkButton(
             master=self, text="Ремонты", command=lambda: self.Repairs(),fg_color="#FF8C19",hover_color="#4DFFFF",text_color="black")
         self.RepairsButton.grid(
             row=0, column=4, pady=10, padx=10)
-        #
-        #
-        #
+
         self.AppearanceButton = customtkinter.CTkOptionMenu(
             self, values=["Light", "Dark"], command=self.change_appearance_mode_event)
         self.AppearanceButton.grid(
@@ -79,17 +61,15 @@ class UpperFrame(customtkinter.CTkFrame):
 
     def AddPc(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
-            # create window if its None or destroyed
             self.toplevel_window = addPC(self)
         else:
-            self.toplevel_window.focus()  # if window exists focus it
+            self.toplevel_window.focus()  
 
     def EditPc(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
-            # create window if its None or destroyed
             self.toplevel_window = editPC(self)
         else:
-            self.toplevel_window.focus()  # if window exists focus it
+            self.toplevel_window.focus()  
 
     def ReloadData(self):
         self.scroll_frame.destroy_and_recreate()
@@ -100,18 +80,19 @@ class UpperFrame(customtkinter.CTkFrame):
         elif new_appearance_mode == "Dark":
             customtkinter.set_appearance_mode(new_appearance_mode)
             
-    def FilterPc(self):
-        pass
-    
     def Repairs(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
-            # create window if its None or destroyed
+            
             self.toplevel_window = Repairs(self)
         else:
-            self.toplevel_window.focus()  # if window exists focus it
+            self.toplevel_window.focus()  
 
     def ExportPc(self):
-        pass
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            
+            self.toplevel_window = Reports(self)
+        else:
+            self.toplevel_window.focus()  
     
 
 

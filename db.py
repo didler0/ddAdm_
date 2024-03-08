@@ -16,6 +16,28 @@ class SQL:
         except Exception as e:
             print(f"Error establishing connection: {str(e)}")
             
+    def check_and_create_PCStatusDuringPeriod_procedure(self):
+        try:
+            # Проверяем наличие процедуры
+            self.cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND ROUTINE_NAME = 'PCStatusDuringPeriod'")
+            if self.cursor.fetchone()[0] == 0:
+                # Если процедуры нет, создаем ее
+                self.cursor.execute('''
+                    CREATE PROCEDURE PCStatusDuringPeriod
+                        @start_date DATETIME,
+                        @end_date DATETIME
+                    AS
+                    BEGIN
+                        SELECT b.ip, b.place_of_installation, s.status_, s.status_date
+                        FROM basic_info b
+                        JOIN statuses s ON b.id = s.basic_info_id
+                        WHERE s.status_date BETWEEN @start_date AND @end_date;
+                    END
+                ''')
+                self.connection.commit()
+                print("Procedure PCStatusDuringPeriod created.")
+        except Exception as e:
+            print(f"Error checking or creating procedure: {e}")
 
     def set_last_repair_date(self, basic_info_id):
         try:
@@ -216,9 +238,10 @@ class SQL:
             
     
                 
-                
+            self.check_and_create_PCStatusDuringPeriod_procedure()
             self.create_trigger()
             self.check_and_create_procedure()
+
             print("All tables checked and created if necessary.")
         except Exception as e:
             print(f"Error creating tables: {str(e)}")
@@ -619,6 +642,52 @@ class SQL:
             print(f"Error deleting repair: {e}")
             # Откатить транзакцию в случае ошибки
             self.connection.rollback()
+    
+    def call_PCStatusDuringPeriod_procedure(self, start_date, end_date):
+        try:
+            # Вызов процедуры
+            self.cursor.execute("EXEC PCStatusDuringPeriod @start_date=?, @end_date=?", (start_date, end_date))
+            result = self.cursor.fetchall()
+            # Вывод результатов
+            return result
+            for row in result:
+                print(row)
+        except Exception as e:
+            print(f"Error calling PCStatusDuringPeriod procedure: {e}")
+
+
+    def get_device_info_by_location(self, installation_place):
+        try:
+            # Получение данных из базы данных
+            self.cursor.execute("""
+                SELECT b.ip, b.place_of_installation, b.last_repair, b.last_status
+                FROM basic_info b
+                LEFT JOIN (
+                    SELECT basic_info_id, MAX(status_date) AS max_date
+                    FROM statuses
+                    GROUP BY basic_info_id
+                ) AS s ON b.id = s.basic_info_id
+                LEFT JOIN (
+                    SELECT basic_info_id, MAX(repair_date) AS last_repair
+                    FROM repairs
+                    GROUP BY basic_info_id
+                ) AS r ON b.id = r.basic_info_id
+                WHERE b.place_of_installation = ?
+            """, (installation_place,))
+
+            device_info = self.cursor.fetchall()
+
+            if device_info:
+                return device_info
+            else:
+                return None
+
+        except Exception as e:
+            print(f"Error fetching device information: {str(e)}")
+            return None
+        
+   
+
 
 
 
