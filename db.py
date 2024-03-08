@@ -17,39 +17,66 @@ class SQL:
             print(f"Error establishing connection: {str(e)}")
     
     
+    def check_and_create_procedure(self):
+        try:
+            # Проверка наличия процедуры InsertRepair
+            self.cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND ROUTINE_NAME = 'InsertRepair'")
+            if self.cursor.fetchone()[0] == 0:
+                # Если процедуры нет, создаем ее
+                self.cursor.execute('''
+                    CREATE PROCEDURE InsertRepair
+                        @basic_info_id INT,
+                        @description VARCHAR(100),
+                        @repair_date DATE,
+                        @document_path VARCHAR(100)
+                    AS
+                    BEGIN
+                        INSERT INTO repairs (basic_info_id, description, repair_date, document_path)
+                        VALUES (@basic_info_id, @description, @repair_date, @document_path)
+                    END
+                ''')
+                self.connection.commit()
+                print("Procedure InsertRepair created.")
+        except Exception as e:
+            print(f"Error checking or creating procedure: {e}")
+
     def create_trigger(self):
         try:
-            # Создание триггера trg_StatusUpdate (если нету таблички)
-            self.cursor.execute('''
-                CREATE TRIGGER trg_StatusUpdate
-                ON basic_info
-                AFTER INSERT, UPDATE
-                AS
-                BEGIN
-                    DECLARE @ip VARCHAR(15)
-                    DECLARE @last_status BIT
-                    DECLARE @data_status DATETIME
+            # Проверка наличия триггера trg_StatusUpdate
+            self.cursor.execute("SELECT COUNT(*) FROM sys.triggers WHERE name = 'trg_StatusUpdate'")
+            if self.cursor.fetchone()[0] == 0:
+                # Создание триггера trg_StatusUpdate (если его нет)
+                self.cursor.execute('''
+                    CREATE TRIGGER trg_StatusUpdate
+                    ON basic_info
+                    AFTER INSERT, UPDATE
+                    AS
+                    BEGIN
+                        DECLARE @ip VARCHAR(15)
+                        DECLARE @last_status BIT
+                        DECLARE @data_status DATETIME
 
-                    SELECT @ip = inserted.ip, @last_status = inserted.last_status, @data_status = inserted.data_status
-                    FROM inserted
+                        SELECT @ip = inserted.ip, @last_status = inserted.last_status, @data_status = inserted.data_status
+                        FROM inserted
 
-                    INSERT INTO statuses (basic_info_id, status_, status_date)
-                    SELECT id, @last_status, @data_status
-                    FROM basic_info
-                    WHERE ip = @ip
-                END
-            ''')
-            self.connection.commit()
-            print("Trigger trg_StatusUpdate created successfully.")
+                        INSERT INTO statuses (basic_info_id, status_, status_date)
+                        SELECT id, @last_status, @data_status
+                        FROM basic_info
+                        WHERE ip = @ip
+                    END
+                ''')
+                self.connection.commit()
+                print("Trigger trg_StatusUpdate created successfully.")
         except Exception as e:
             print(f"Error creating trigger: {str(e)}")
+
 
 
 
     
     def create_tables_if_not_exist(self):
         try:
-            self.create_trigger()
+            
             #Проверка на наличие basic_info и ее создание
             self.cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'basic_info'")
             if self.cursor.fetchone()[0] == 0:
@@ -166,13 +193,21 @@ class SQL:
                 ''')
                 self.connection.commit()
                 print("Table photo created.")
-          
-                
-                
             
+            
+
+            
+    
+                
+                
+            self.create_trigger()
+            self.check_and_create_procedure()
             print("All tables checked and created if necessary.")
         except Exception as e:
             print(f"Error creating tables: {str(e)}")
+
+
+
 
     def get_basic_info(self):
        try:
@@ -505,12 +540,69 @@ class SQL:
             for i in basic_id:
                 query = f"SELECT * FROM repairs WHERE basic_info_id = {i}"
                 self.cursor.execute(query)
-                res.append(self.cursor.fetchone())
+                res.append(self.cursor.fetchall())
 
             return res
         except Exception as e:
             print(f"Error fetching repairs by basic id: {e}")
             return None
+
+    def get_repair_by__id(self, idd):
+        try:
+            query = f"SELECT * FROM repairs WHERE id = {idd}"
+            self.cursor.execute(query)
+            qwe=self.cursor.fetchone()
+
+            return qwe
+        except Exception as e:
+            print(f"Error fetching repairs by basic id: {e}")
+            return None
+        
+    def insert_repair(self, basic_info_id, description, repair_date, document_path):
+        try:
+            # Выполнить хранимую процедуру InsertRepair с переданными параметрами
+            self.cursor.execute("EXEC InsertRepair @basic_info_id=?, @description=?, @repair_date=?, @document_path=?",
+                                (basic_info_id, description, repair_date, document_path))
+            # Применить изменения к базе данных
+            self.connection.commit()
+            print("Repair inserted successfully.")
+        except Exception as e:
+            print(f"Error inserting repair: {e}")
+            # Откатить транзакцию в случае ошибки
+            self.connection.rollback()
+    
+    def update_repair(self, repair_id, description, repair_date):
+        try:
+            # Выполнить SQL-запрос для обновления записи
+            query = """
+                UPDATE repairs
+                SET description = ?, repair_date = ?
+                WHERE id = ?
+            """
+            self.cursor.execute(query, (description, repair_date, repair_id))
+
+            # Применить изменения к базе данных
+            self.connection.commit()
+            print("Repair updated successfully.")
+        except Exception as e:
+            print(f"Error updating repair: {e}")
+            # Откатить транзакцию в случае ошибки
+            self.connection.rollback()
+
+    def delete_repair(self, repair_id):
+        try:
+            # Выполнить SQL-запрос для удаления записи ремонта
+            query = "DELETE FROM repairs WHERE id = ?"
+            self.cursor.execute(query, (repair_id,))
+            
+            # Применить изменения к базе данных
+            self.connection.commit()
+            print("Repair deleted successfully.")
+        except Exception as e:
+            print(f"Error deleting repair: {e}")
+            # Откатить транзакцию в случае ошибки
+            self.connection.rollback()
+
 
 
 
