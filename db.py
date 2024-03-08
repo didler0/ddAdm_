@@ -15,7 +15,24 @@ class SQL:
             print("Connection established successfully.")
         except Exception as e:
             print(f"Error establishing connection: {str(e)}")
-    
+            
+
+    def set_last_repair_date(self, basic_info_id):
+        try:
+            # Находим последнюю дату ремонта для данного basic_info_id
+            self.cursor.execute("SELECT MAX(repair_date) FROM repairs WHERE basic_info_id = ?", (basic_info_id,))
+            last_repair_date = self.cursor.fetchone()[0]
+
+            # Обновляем last_repair в таблице basic_info
+            if last_repair_date:
+                self.cursor.execute("UPDATE basic_info SET last_repair = ? WHERE id = ?", (last_repair_date, basic_info_id))
+                self.connection.commit()
+                print(f"Last repair date set to {last_repair_date} for basic_info_id {basic_info_id}.")
+            else:
+                print(f"No repair dates found for basic_info_id {basic_info_id}.")
+        except Exception as e:
+            print(f"Error setting last repair date: {str(e)}")
+
     
     def check_and_create_procedure(self):
         try:
@@ -594,7 +611,7 @@ class SQL:
             # Выполнить SQL-запрос для удаления записи ремонта
             query = "DELETE FROM repairs WHERE id = ?"
             self.cursor.execute(query, (repair_id,))
-            
+
             # Применить изменения к базе данных
             self.connection.commit()
             print("Repair deleted successfully.")

@@ -3,7 +3,7 @@ import tkinter
 import re
 from db import *
 from CTkMessagebox import CTkMessagebox
-
+from hPyT import *
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("blue")
 
@@ -24,8 +24,9 @@ class editPC(customtkinter.CTkToplevel):
     def create_widgets(self):
         self.title("Edit Computer")
         self.geometry("600x730")
-        #self.minsize  (600, 555)
-        #self.maxsize  (600, 555)
+        self.minsize  (600, 730)
+        self.maxsize  (600, 730)
+        maximize_minimize_button.hide(self)
         self.frame = customtkinter.CTkScrollableFrame(self,height=620)
         self.grid_columnconfigure(0,weight=1)
         self.frame.rowconfigure(0,weight=1)
@@ -100,7 +101,7 @@ class editPC(customtkinter.CTkToplevel):
             label.grid(row=i, column=0, padx=10, pady=10, sticky="ew")
             if text=="Wake on LAN":
                 self.switch_var = customtkinter.StringVar(value="off")
-                switch=customtkinter.CTkSwitch(master=self.tabview.tab("Детальное описание"),text='',command=lambda:switch_event(switch_var),
+                switch=customtkinter.CTkSwitch(master=self.tabview.tab("Детальное описание"),text='',command=lambda:switch_event(self.switch_var),
                                  variable=self.switch_var,onvalue="on", offvalue="off")
                 switch.grid(row=i, column=1, padx=10, pady=10, sticky="ew") 
                 self.widgetsDetailDescription.append(switch) 
@@ -138,14 +139,9 @@ class editPC(customtkinter.CTkToplevel):
         data_basic_filtred=[]
         data_basic_filtred = data_basic[1:5]
         self.data_detail=sql.get_detail_info_by_id(numbers)
-        print(self.data_detail)
         self.data_detail_filtred = self.data_detail[3:8]
-        print(self.data_detail)
         self.data_comp=sql.get_components_by_id(self.data_detail[2])
         data_comp_filyted=self.data_comp[1:15]
-        #self.widgetsDescription
-        #self.widgetsComponents
-        #self.widgetsDetailDescription
         # Установка данных в виджеты базовой информации
         for i, value in enumerate(data_basic_filtred):
                 if isinstance(self.widgetsDescription[i], customtkinter.CTkEntry):
@@ -164,8 +160,6 @@ class editPC(customtkinter.CTkToplevel):
 
                     self.widgetsDetailDescription[i].insert(tkinter.END, value)  # Установить значение в CTkTextbox
                 elif isinstance(self.widgetsDetailDescription[i], customtkinter.CTkSwitch):
-                    
-                    ##проверить шоб пересчелкивался
                     self.switch_var.set(value)
 
         # Установка данных в виджеты компонентов
@@ -236,9 +230,6 @@ class editPC(customtkinter.CTkToplevel):
         id_basic=self.data_detail[1]
         id_comp=self.data_detail[2]
         id_details=self.data_detail[0]
-        print(id_basic)
-        print(id_comp)
-        print(id_details)
         sql.delete_statuses_by_basic_info_id(id_basic)
         sql.delete_detail_info(id_details)
         sql.delete_photos_by_basic_id(id_basic)

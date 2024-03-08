@@ -5,11 +5,13 @@ from addPc import *
 from editPc import *
 from PhotoViewer import *
 from repairs import *
+from Description import *
 from datetime import datetime
 import concurrent.futures
 import os
 import threading
 import subprocess
+from hPyT import *
 
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("blue")
@@ -164,10 +166,10 @@ class DownFrame(customtkinter.CTkScrollableFrame):
         label = customtkinter.CTkLabel(master=tab, text=data[3], font=("Arial", 12))
         label.grid(row=iq+2, column=2, padx=10, pady=10)
         ##descr
-        self.DesPcButtonPcButton = customtkinter.CTkButton(master=tab, text="Описание")  #, command=lambda i=i+1: Description.DescrPC(self, i))
+        self.DesPcButtonPcButton = customtkinter.CTkButton(master=tab, text="Описание",command=lambda: threading.Thread(target=DescriptionViewer.DescriptionView, args=(self,data[0])).start())
         self.DesPcButtonPcButton.grid(row=iq+2, column=3, pady=10,padx=10)
         ##photo
-        self.PhotoPcButtonPcButton = customtkinter.CTkButton(master=tab, text="Фото",command=lambda: PhotoViewer.PhotoView(self,data[0]))  #, command=lambda i=i+1: Description.DescrPC(self, i))
+        self.PhotoPcButtonPcButton = customtkinter.CTkButton(master=tab, text="Фото",command=lambda: PhotoViewer.PhotoView(self,data[0])) 
         self.PhotoPcButtonPcButton.grid(row=iq+2, column=4, pady=10,padx=10)
         
         if data[7]==None:
@@ -237,9 +239,14 @@ class DownFrame(customtkinter.CTkScrollableFrame):
                 widget.destroy()
         data = sql.get_basic_info()
         ips=[] ##все айпищники
+        ids=[]
         for i in range(len(data)):
             ips.append(data[i][1])
+            ids.append(data[i][0])
+        for i in ids:
+            sql.set_last_repair_date(i)
         DownFrame.check_connections(ips)
+        data = sql.get_basic_info()
         for i in self.tabs:
             tab = self.tabs[i]
             for iq in range(len(data)):
@@ -286,7 +293,7 @@ class App(customtkinter.CTk):
         self.title("ddAdmin")
         self.geometry(f"{App.WIDTH}x{App.HEIGHT}")
         self.grid_columnconfigure(0, weight=1)
-
+        maximize_minimize_button.hide(self)
         
         self.frame_down=DownFrame(self)
         self.frame_down.grid(row=1,column=0,padx=10,pady=10, sticky="ew")

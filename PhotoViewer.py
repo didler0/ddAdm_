@@ -83,7 +83,6 @@ class PhotoViewer(customtkinter.CTkToplevel):
     def OpenPic(self):
         curval = self.combobox1.get()
         path = os.path.join("images", curval)
-        print(path)
         os.startfile(path)
         
     @staticmethod
@@ -94,7 +93,6 @@ class PhotoViewer(customtkinter.CTkToplevel):
         )
         if file_path:
             try:
-                print(file_path)
                 file_name = os.path.basename(file_path)
                 target_file_path = os.path.join("images", file_name)
                 shutil.copy(file_path, "images")
@@ -102,7 +100,7 @@ class PhotoViewer(customtkinter.CTkToplevel):
                 PhotoViewer.FillComboBoxes(self)
                 PhotoViewer.update_carousel(self)
             except Exception as e:
-                print(f"Ошибка при открытии изображения: {e}")
+                CTkMessagebox(title="Ошибка",message="Ошибка при открытии изображения.", icon="cancel")
         
     @staticmethod
     def DelPic(self):

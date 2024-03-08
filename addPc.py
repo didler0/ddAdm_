@@ -3,7 +3,7 @@ import tkinter
 import re
 from db import *
 from CTkMessagebox import CTkMessagebox
-
+from hPyT import *
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("blue")
 
@@ -18,13 +18,13 @@ class addPC(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.create_widgets()
-        
+        maximize_minimize_button.hide(self)
     
     def create_widgets(self):
         self.title("Add Computer")
         self.geometry("600x595")
-        #self.minsize  (600, 555)
-        #self.maxsize  (600, 555)
+        self.minsize  (600, 595)
+        self.maxsize  (600, 595)
 
         self.frame = customtkinter.CTkScrollableFrame(self,height=520)
         self.grid_columnconfigure(0,weight=1)
@@ -122,7 +122,7 @@ class addPC(customtkinter.CTkToplevel):
             self.AddPcDetail()
             CTkMessagebox(title="Успех", message="Компьютер успешно добавлен!\n Если была добавлена новая категория - перезапустите приложение",icon="check", option_1="Ok")
         else:
-            print("ploho")
+            CTkMessagebox(title="Ошибка",message="Ошибка.", icon="cancel")
             
             
             
@@ -204,9 +204,6 @@ class addPC(customtkinter.CTkToplevel):
                 
             bas=sql.get_last_basic_info_id()
             com=sql.get_last_components_id()
-            print(bas)
-            print(com)
-            print(values_detail)
             sql.add_detail_info(bas,com,*values_detail)
             
             return True
