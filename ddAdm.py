@@ -4,6 +4,7 @@ from db import *
 from addPc import *
 from editPc import *
 from PhotoViewer import *
+from repairs import *
 from datetime import datetime
 import concurrent.futures
 import os
@@ -61,6 +62,14 @@ class UpperFrame(customtkinter.CTkFrame):
             row=0, column=4, pady=10, padx=10)
         #
         #
+        #
+        self.RepairsButton = customtkinter.CTkButton(
+            master=self, text="Ремонты", command=lambda: self.Repairs(),fg_color="#FF8C19",hover_color="#4DFFFF",text_color="black")
+        self.RepairsButton.grid(
+            row=0, column=4, pady=10, padx=10)
+        #
+        #
+        #
         self.AppearanceButton = customtkinter.CTkOptionMenu(
             self, values=["Light", "Dark"], command=self.change_appearance_mode_event)
         self.AppearanceButton.grid(
@@ -91,6 +100,13 @@ class UpperFrame(customtkinter.CTkFrame):
             
     def FilterPc(self):
         pass
+    
+    def Repairs(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            # create window if its None or destroyed
+            self.toplevel_window = Repairs(self)
+        else:
+            self.toplevel_window.focus()  # if window exists focus it
 
     def ExportPc(self):
         pass

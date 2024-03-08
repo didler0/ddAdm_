@@ -5,7 +5,7 @@ import shutil
 from tkinter import filedialog
 from ctkcomponents import *
 from CTkMessagebox import CTkMessagebox
-
+from hPyT import *
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("blue")
 
@@ -33,6 +33,9 @@ class PhotoViewer(customtkinter.CTkToplevel):
             self.photo_id = photo_id
             self.additionalWIN = customtkinter.CTkToplevel(self)
             self.additionalWIN.geometry("460x730")
+            self.additionalWIN.minsize(460,730)
+            self.additionalWIN.maxsize(460,730)
+            maximize_minimize_button.hide(self.additionalWIN)
             self.additionalWIN.title(f"Photo Viewer for {self.photo_id}")
             self.additionalWIN.focus()
             images = sql.get_photos_by_basic_id(self.photo_id)
@@ -43,9 +46,9 @@ class PhotoViewer(customtkinter.CTkToplevel):
             self.additionalWIN.frame_p.columnconfigure(0, weight=1)
             self.additionalWIN.frame_p.rowconfigure(0, weight=1)
             
-            PhotoViewer.update_carousel(self)
-            #my_carousel = CTkCarousel(master=self.additionalWIN.frame_p, img_list=image_paths, width=400, height=400, img_radius=25)
-            #my_carousel.grid(row=0, column=0, padx=20, pady=20, columnspan=3)
+            if images:
+                PhotoViewer.update_carousel(self)
+
 
             label = customtkinter.CTkLabel(master=self.additionalWIN.frame_p, text="Добавить фото", fg_color="gray30", font=("Arial", 12))
             label.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="ew")
@@ -117,7 +120,13 @@ class PhotoViewer(customtkinter.CTkToplevel):
     
     @staticmethod    
     def FillComboBoxes(self):
+        
         ToComboBoxOne = sql.get_photos_by_basic_id(self.photo_id)
+        if not ToComboBoxOne:
+            # Если список пуст, установите пустое значение в combobox
+            self.combobox1.configure(values=[" "])
+            return
+
         sasha = [str(data[2]) for data in ToComboBoxOne]
         self.combobox1.configure(values=sasha)
         self.update()

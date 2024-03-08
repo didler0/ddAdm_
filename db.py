@@ -498,6 +498,20 @@ class SQL:
             print(f"All photos with basic_id {basic_id} deleted successfully.")
         except Exception as e:
             print(f"Error deleting photos: {str(e)}")
+            
+    def get_repairs_by_basic_id(self, basic_id):
+        try:
+            res=[]
+            for i in basic_id:
+                query = f"SELECT * FROM repairs WHERE basic_info_id = {i}"
+                self.cursor.execute(query)
+                res.append(self.cursor.fetchone())
+
+            return res
+        except Exception as e:
+            print(f"Error fetching repairs by basic id: {e}")
+            return None
+
 
 
 
