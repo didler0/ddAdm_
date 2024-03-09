@@ -263,25 +263,34 @@ class Reports(customtkinter.CTkToplevel):
         
         paragraph = doc.add_paragraph()
         run=paragraph.add_run("Ремонты:")
+        run.bold = True
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(14)
         repairs_list=[]
         repairs_list=sql.get_repairs_by_basic_id(numbers)
-
-
-
-        table2=doc.add_table(rows=len(repairs_list), cols=2)
+        
+        number_of_tuples = sum(len(sublist) for sublist in repairs_list)
+        print("Количество кортежей внутри списка repairs_list:", number_of_tuples)
+        print("da blyaaa")
+        table2=doc.add_table(rows=number_of_tuples, cols=2)
         for sublist in repairs_list:
             for i, rep in enumerate(sublist):
                 print(f"Index: {i}, Value: {rep}")
-    # Далее ваш код для заполнения таблицы
+                print(str(rep[2]))
+                print(str(rep[3]))
+                
+                table2.cell(i, 0).text = str(rep[2])
+                table2.cell(i, 1).text = str(rep[3])
+            
+        file_path="ReportPc.docx"
+        # Удаление файла, если он существует
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        # Сохранение документа
+        doc.save(file_path)
+        # Открытие файла с помощью программы по умолчанию
+        os.startfile(file_path)
 
-            
-            #table2.cell(i, 0).text = str(rep[2])  # Значение столбца 1
-            
-            #table2.cell(i, 1).text = str(rep[3])  # Значение столбца 2
-
-            
-        doc.save("новый_документ.docx")
-    
     
     def FillComboBoxes4(self):
         ToComboBoxOne = sql.get_basic_info()
