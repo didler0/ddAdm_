@@ -12,6 +12,7 @@ from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from datetime import datetime
+from docxtpl import DocxTemplate
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("blue")
 
@@ -29,16 +30,18 @@ class Reports(customtkinter.CTkToplevel):
     
     def create_widgets(self):
         self.title("Edit Computer")
-        self.geometry("350x  450")
-        self.minsize  (350,  450)
-        self.maxsize  (350,  450)
+        self.geometry("850x  450")
+        self.minsize  (850,  450)
+        self.maxsize  (850,  450)
         maximize_minimize_button.hide(self)
         self.grid_columnconfigure((1),weight=1)
         self.grid_rowconfigure((0,1),weight=1)
         self.create_frame1()
         self.create_frame2()
-        #self.create_frame3()
-
+        self.create_frame3()
+            #отчет по все инфо на выбранный пк
+            #
+            #отчет по ремонтам за промежуток дат
         
         
         
@@ -71,9 +74,6 @@ class Reports(customtkinter.CTkToplevel):
         
         self.MakeReport1Button = customtkinter.CTkButton(master=self.frame1, text="Сформировать и открыть отчет", command=lambda: self.MakeReport1())
         self.MakeReport1Button.grid(row=5, column=0,columnspan=4, pady=5, padx=10, sticky="ew")
-    
-
-      
     def create_frame2(self):
         self.frame2 = customtkinter.CTkFrame(self,height=520)
         self.frame2.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
@@ -149,19 +149,145 @@ class Reports(customtkinter.CTkToplevel):
         except Exception as e:
             print(f"Error creating report: {str(e)}")
         
-        
-    
-        
-        
-    #def create_frame3(self):
-    #    self.frame3 = customtkinter.CTkScrollableFrame(self, height=920, width=650)
-    #    self.frame3.grid(row=0, rowspan=3, column=2, padx=10, pady=10, sticky="ew")
-    #    self.frame3.grid_columnconfigure((0,1,2,3), weight=1)
-    #    customtkinter.CTkLabel(master=self.frame3, text="Отчет по параметрам", fg_color="gray30", font=("Arial", 14)).grid(row=0, columnspan=4, column=0, padx=10, pady=10, sticky="ew")
+        #отчет по все инфо на выбранный пк
 
+        #отчет по ремонтам за промежуток дат
+        
     
         
         
+    def create_frame3(self):
+        self.frame3 = customtkinter.CTkScrollableFrame(self, height=920, width=450)
+        self.frame3.grid(row=0, rowspan=3, column=2, padx=10, pady=10, sticky="ew")
+        self.frame3.grid_columnconfigure((0,1,2), weight=1)
+        customtkinter.CTkLabel(master=self.frame3, text="Отчет на выбранный компьютер", fg_color="gray30", font=("Arial", 14)).grid(row=0, columnspan=4, column=0, padx=10, pady=10, sticky="ew")
+        self.combobox4= customtkinter.CTkComboBox(master=self.frame3,values=[" "], state="readonly")
+        self.combobox4.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+        self.FillComboBoxes4()
+        
+        self.MakeReport3Button = customtkinter.CTkButton(master=self.frame3, text="Сформировать и открыть отчет", command=lambda: self.MakeReport3())
+        self.MakeReport3Button.grid(row=2, column=0,columnspan=4, pady=5, padx=10, sticky="ew")
+        
+    
+    def MakeReport3(self):
+        doc = DocxTemplate("PATTERN_REPORT_FOR_ONE.docx")
+        currVal = self.combobox4.get()
+        parts = currVal.split('|')  # Разделить строку на подстроки по символу '|'
+        if len(parts) > 0:
+            numbers = parts[0].strip()  # Получить первую подстроку и удалить лишние пробелы
+        else:
+            pass
+        basic_data=sql.get_basic_info_by_id(numbers)
+        print(basic_data)
+        detail_data=sql.get_detail_info_by_id(basic_data[0])
+        print(detail_data)
+        component=sql.get_components_by_id(detail_data[2])
+        print(component)
+        
+        _inv_numb=detail_data[3]
+        _network_name=basic_data[2]
+        _location=basic_data[3]
+        _description_basic=basic_data[4]
+        _last_status=basic_data[5]
+        _data_laststatus=basic_data[6]
+        _last_repair=basic_data[7]
+        _serial_numb=detail_data[4]
+        _mac_adr=detail_data[5]
+        _wake_on_lan=detail_data[6]
+        _vnc_password=detail_data[7]
+        _processor=component[1]
+        _ram=component[2]
+        _motherboard=component[3]
+        _graphicCard=component[4]
+        _psu=component[5]
+        _networkCard=component[6]
+        _cooler=component[7]
+        _chasis=component[8]
+        _hdd=component[9]
+        _ssd=component[10]
+        _monitor=component[11]
+        _keyboard=component[12]
+        _mouse=component[13]
+        _audio=component[14]
+        context = {
+        'inv_numb': _inv_numb,
+        'network_name': _network_name,
+        'location': _location,
+        'description_basic': _description_basic,
+        'last_status': _last_status,
+        'data_laststatus': _data_laststatus,
+        'last_repair': _last_repair,
+        'serial_numb': _serial_numb,
+        'mac_adr': _mac_adr,
+        'wake_on_lan': _wake_on_lan,
+        'vnc_password':  _vnc_password,
+        'processor': _processor,
+        'ram': _ram,
+        'motherboard': _motherboard,
+        'graphicCard': _graphicCard,
+        'psu': _psu,
+        'networkCard': _networkCard,
+        'cooler': _cooler,
+        'chasis': _chasis,
+        'hdd': _hdd,
+        'ssd': _ssd,
+        'monitor': _monitor,
+        'keyboard': _keyboard,
+        'mouse': _mouse,
+        'audio': _audio
+        }
+
+        doc.render(context)
+        doc.add_page_break()
+
+        # Создаем абзац
+        paragraph = doc.add_paragraph()
+
+        # Добавляем текст и задаем стиль
+        run = paragraph.add_run("Статусы данного ПК")
+        run.bold = True
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(14)
+
+        # Выравнивание текста
+        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # Выравнивание по центру
+        statuses=sql.get_statuses_by_basic_info_id(basic_data[0])
+        
+        # Добавляем таблицу с двумя колонками
+        table = doc.add_table(rows=len(statuses), cols=2)
+        # Заполняем таблицу данными из списка statuses
+        for i, status in enumerate(statuses):
+            status_value = 'Вкл' if status[2] else 'Выкл'
+            table.cell(i, 0).text = str(status_value)  # Значение столбца 1
+            table.cell(i, 1).text = str(status[3])  # Значение столбца 2
+        
+        paragraph = doc.add_paragraph()
+        run=paragraph.add_run("Ремонты:")
+        repairs_list=[]
+        repairs_list=sql.get_repairs_by_basic_id(numbers)
+
+
+
+        table2=doc.add_table(rows=len(repairs_list), cols=2)
+        for sublist in repairs_list:
+            for i, rep in enumerate(sublist):
+                print(f"Index: {i}, Value: {rep}")
+    # Далее ваш код для заполнения таблицы
+
+            
+            #table2.cell(i, 0).text = str(rep[2])  # Значение столбца 1
+            
+            #table2.cell(i, 1).text = str(rep[3])  # Значение столбца 2
+
+            
+        doc.save("новый_документ.docx")
+    
+    
+    def FillComboBoxes4(self):
+        ToComboBoxOne = sql.get_basic_info()
+        sasha = [str(data[0]) + " | " + str(data[1]) for data in ToComboBoxOne]
+        self.combobox4.configure(values=sasha)
+        self.update()
         
     def select_date1(self):
         try:

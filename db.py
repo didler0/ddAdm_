@@ -686,7 +686,18 @@ class SQL:
             print(f"Error fetching device information: {str(e)}")
             return None
         
-   
+    def get_statuses_by_basic_info_id(self, basic_info_id):
+     try:
+         # Выбираем статусы для заданного basic_info_id
+         self.cursor.execute("SELECT * FROM statuses WHERE basic_info_id = ?", (basic_info_id,))
+         rows = self.cursor.fetchall()
+         if rows:
+             return rows
+         else:
+             return "No data found for the specified basic_info_id."
+     except Exception as e:
+         print(f"Error fetching data from statuses table: {str(e)}")
+
 
 
 
