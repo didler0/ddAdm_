@@ -243,6 +243,8 @@ class Repairs(customtkinter.CTkToplevel):
             pathRep=self.create_repair_folder(numbers)
             sql.insert_repair(numbers,descrRep,dateRep,pathRep)
             self.FillComboBox2()
+            CTkMessagebox(title="Успех",message="Ремонт успешно добавлен! ", icon="check")
+            self.ClearData()
         except Exception as e:
             CTkMessagebox(title="Ошибка",message="Ошибка добавления ремонта! ", icon="cancel")
             return None
@@ -266,7 +268,8 @@ class Repairs(customtkinter.CTkToplevel):
                 # Попытаться обновить запись ремонта
                 sql.update_repair(repair_id, description, repair_date)
                 # Вывести сообщение об успешном обновлении
-                CTkMessagebox(title="Успех", message="Ремонт успешно обновлен!", icon="info")
+                self.ClearData()
+                CTkMessagebox(title="Успех", message="Ремонт успешно обновлен!", icon="check")
             else:
                 # Вывести сообщение об ошибке, если не все данные заполнены
                 CTkMessagebox(title="Ошибка", message="Пожалуйста, заполните все поля!", icon="warning")
@@ -288,7 +291,7 @@ class Repairs(customtkinter.CTkToplevel):
                 # Попытаться обновить запись ремонта
                 sql.delete_repair(repair_id)
                 # Вывести сообщение об успешном обновлении
-                CTkMessagebox(title="Успех", message="Ремонт успешно удалён!", icon="info")
+                CTkMessagebox(title="Успех", message="Ремонт успешно удалён!", icon="check")
                 self.ClearData()
             else:
                 # Вывести сообщение об ошибке, если не все данные заполнены

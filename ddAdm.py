@@ -103,28 +103,35 @@ class DownFrame(customtkinter.CTkScrollableFrame):
         self.tabview = customtkinter.CTkTabview(master=self)
         self.tabview.pack(fill='both', expand=True, padx=10, pady=10)
         data = sql.get_basic_info()
-        ips=[] ##все айпищники
-        qwe={''} ##все кабинетики (вкладочки)
-        self.tabs={}
-        labels_text = ["Ip", "Название в сети", "Место установки", "Описание", "Фото",
-                           "Статус", "Последний ремонт","VNC"]
-        for i in range(len(data)):
-            qwe.add(data[i][3])
-            ips.append(data[i][1])
-        qwe.discard('')
-        qwe = sorted(qwe)
-        #DownFrame.check_connections(ips)
+        print(f"{data} qqwuieey")
+        if not data or data=="No data found in basic_info table.":
+            
+            CTkMessagebox(title="Ошибка",message="Отсутствуют данные! ", icon="cancel")
+            return
+        else:
+            
+            ips=[] ##все айпищники
+            qwe={''} ##все кабинетики (вкладочки)
+            self.tabs={}
+            labels_text = ["Ip", "Название в сети", "Место установки", "Описание", "Фото",
+                               "Статус", "Последний ремонт","VNC"]
+            for i in range(len(data)):
+                qwe.add(data[i][3])
+                ips.append(data[i][1])
+            qwe.discard('')
+            qwe = sorted(qwe)
+            #DownFrame.check_connections(ips)
 
-        for i in qwe:
-            tab=self.tabview.add(i)
-            self.tabs[i] = tab
-            
-            
-        for iq in range(len(data)):
-                p=data[iq][3]
-                if(p==i):
-                    qwe=data[iq]
-                    self.create_str(self,tab, qwe ,iq)
+            for i in qwe:
+                tab=self.tabview.add(i)
+                self.tabs[i] = tab
+
+
+            for iq in range(len(data)):
+                    p=data[iq][3]
+                    if(p==i):
+                        qwe=data[iq]
+                        self.create_str(self,tab, qwe ,iq)
 
     @staticmethod
     def create_lables(self,tab):
@@ -140,6 +147,9 @@ class DownFrame(customtkinter.CTkScrollableFrame):
             
     @staticmethod
     def create_str(self,tab,data,iq):
+        def run_vnc_exe(ip_address):
+            subprocess.run(["VNC.exe", ip_address])
+            
         label = customtkinter.CTkLabel(master=tab, text=data[1], font=("Arial", 12))
         label.grid(row=iq+2, column=0, padx=10, pady=10)
         label = customtkinter.CTkLabel(master=tab, text=data[2], font=("Arial", 12))
@@ -160,10 +170,17 @@ class DownFrame(customtkinter.CTkScrollableFrame):
             label = customtkinter.CTkLabel(master=tab, text=data[7], font=("Arial", 12))
             label.grid(row=iq+2, column=6, padx=10, pady=10)
             
-        self.VNCPcButton = customtkinter.CTkButton(     #(subprocess.run(["VNC.exe", data[iq][1]]))
-        master=tab, text="VNC",width=30, command=lambda: (subprocess.run(["VNC.exe", data[1]])))
-        self.VNCPcButton.grid(row=iq+2, column=7, pady=10,padx=10)
+        #self.VNCPcButton = customtkinter.CTkButton(     #(subprocess.run(["VNC.exe", data[iq][1]]))
+        #master=tab, text="VNC",width=30, command=lambda: (subprocess.run(["VNC.exe", data[1]])))
+        #self.VNCPcButton.grid(row=iq+2, column=7, pady=10,padx=10)
 
+        self.VNCPcButton = customtkinter.CTkButton(
+            master=tab, 
+            text="VNC", 
+            width=30, 
+            command=lambda: threading.Thread(target=run_vnc_exe, args=(data[1],)).start()
+        )
+        self.VNCPcButton.grid(row=iq+2, column=7, pady=10, padx=10)
         if(data[5]==True):
             label11 = customtkinter.CTkLabel(master=tab, text="          ", bg_color="green")
             label11.grid(row=iq+2, column=5, padx=10, pady=10)
@@ -214,28 +231,41 @@ class DownFrame(customtkinter.CTkScrollableFrame):
                     print(f"Task for IP {ip} encountered an error: {e}")
     
     def destroy_and_recreate(self):
+        
+        if hasattr(self, 'tabs'):
+            for tab_name, tab in self.tabs.items():
+                for widget in tab.winfo_children():
+                    widget.destroy()
+            data = sql.get_basic_info()
+            ips=[] ##все айпищники
+            ids=[]
+            for i in range(len(data)):
+                ips.append(data[i][1])
+                ids.append(data[i][0])
+            for i in ids:
+                sql.set_last_repair_date(i)
+            DownFrame.check_connections(ips)
+            data = sql.get_basic_info()
+            for i in self.tabs:
+                tab = self.tabs[i]
+                for iq in range(len(data)):
+                    p = data[iq][3]
+                    if p == i:
+                        qwe = data[iq]
+                        DownFrame.create_lables(self,tab)
+                        DownFrame.create_str(self,tab, qwe, iq)
+            
+            
+            
+            
+            # Ваш остальной код здесь
+            
+        else:
+            # Обработка случая, когда атрибут tabs отсутствует
+            print("Атрибут 'tabs' не существует в объекте DownFrame")
+
     # Уничтожаем существующие виджеты во всех вкладках
-        for tab_name, tab in self.tabs.items():
-            for widget in tab.winfo_children():
-                widget.destroy()
-        data = sql.get_basic_info()
-        ips=[] ##все айпищники
-        ids=[]
-        for i in range(len(data)):
-            ips.append(data[i][1])
-            ids.append(data[i][0])
-        for i in ids:
-            sql.set_last_repair_date(i)
-        DownFrame.check_connections(ips)
-        data = sql.get_basic_info()
-        for i in self.tabs:
-            tab = self.tabs[i]
-            for iq in range(len(data)):
-                p = data[iq][3]
-                if p == i:
-                    qwe = data[iq]
-                    DownFrame.create_lables(self,tab)
-                    DownFrame.create_str(self,tab, qwe, iq)
+        
                     
                     
 

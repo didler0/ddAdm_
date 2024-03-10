@@ -120,7 +120,7 @@ class addPC(customtkinter.CTkToplevel):
 
         if self.AddPcBasic() and self.AddPcComponents() :
             self.AddPcDetail()
-            CTkMessagebox(title="Успех", message="Компьютер успешно добавлен!\n Если была добавлена новая категория - перезапустите приложение",icon="check", option_1="Ok")
+            CTkMessagebox(title="Успех", message="Компьютер успешно добавлен!\n Если была добавлена новое место расположения\был добавлен ПЕРВЫЙ компьютер - перезапустите приложение",icon="check", option_1="Ok")
         else:
             CTkMessagebox(title="Ошибка",message="Ошибка.", icon="cancel")
             

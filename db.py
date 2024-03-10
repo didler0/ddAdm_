@@ -32,12 +32,12 @@ class SQL:
                            r.repair_date
                     FROM dbo.repairs r
                     INNER JOIN dbo.basic_info b ON r.basic_info_id = b.id
-                    WHERE r.repair_date BETWEEN @start_date AND @end_date;
                 ''')
                 self.connection.commit()
                 print("View RepairsInfo created successfully.")
         except Exception as e:
             print(f"Error creating view: {str(e)}")
+
 
                 
                 
@@ -157,10 +157,10 @@ class SQL:
                                             )
                 ''')
                 
-                self.cursor.execute('''
-                INSERT INTO basic_info (ip, network_name, place_of_installation, description, last_status, data_status, last_repair)
-                VALUES ('192.168.1.1', 'Network1', 'Location1', 'Description1', 0, GETDATE(), GETDATE())
-            ''')
+            #    self.cursor.execute('''
+            #    INSERT INTO basic_info (ip, network_name, place_of_installation, description, last_status, data_status, last_repair)
+            #    VALUES ('192.168.1.1', 'Network1', 'Location1', 'Description1', 0, GETDATE(), GETDATE())
+            #''')
                 self.connection.commit()
                 print("Table basic_info created.")
 
@@ -735,7 +735,7 @@ class SQL:
                 INNER JOIN dbo.basic_info b ON r.basic_info_id = b.id
                 WHERE r.repair_date BETWEEN '{}' AND '{}'
             """.format(date_start, date_end)
-    
+
             self.cursor.execute(query)
             rows = self.cursor.fetchall()
             return rows
