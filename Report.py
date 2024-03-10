@@ -19,7 +19,7 @@ customtkinter.set_default_color_theme("blue")
 
 sql = SQL(server='DDLAPTOP\SQLEXPRESS', database='PC')
 sql.connect()
-
+image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
 
 class Reports(customtkinter.CTkToplevel):
@@ -39,6 +39,7 @@ class Reports(customtkinter.CTkToplevel):
         self.create_frame1()
         self.create_frame2()
         self.create_frame3()
+        self.create_frame4()
             #отчет по все инфо на выбранный пк
             #
             #отчет по ремонтам за промежуток дат
@@ -52,23 +53,23 @@ class Reports(customtkinter.CTkToplevel):
         self.frame1.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         self.frame1.grid_columnconfigure((0,1,2,3),weight=1)
         customtkinter.CTkLabel(master=self.frame1,text="Отчет по статусам работы",fg_color="gray30", font=("Arial", 14)).grid(row=0,columnspan=4, column=0, padx=10, pady=10, sticky="ew")
-        image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+
         
         customtkinter.CTkLabel(master=self.frame1,text="Выберите дату начала периода").grid(row=1, column=0, padx=10,columnspan=4, pady=10, sticky="ew")
         self.DataStart_entry = customtkinter.CTkEntry(master=self.frame1, placeholder_text="ГГГГ-ММ-ДД")
         self.DataStart_entry.grid(row=2, column=1,columnspan=2, padx=10, pady=10, sticky="ew")
         
         self.image_icon_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "calendarICO.png")), size=(20, 20))
-        self.CalendarOpenButton = customtkinter.CTkButton(master=self.frame1, text="Выбрать дату",image=self.image_icon_image, command=lambda: [self.select_date1()])
+        self.CalendarOpenButton = customtkinter.CTkButton(master=self.frame1, text="Выбрать дату",image=self.image_icon_image, command=lambda: [self.select_date(self.DataStart_entry)])
         self.CalendarOpenButton.grid(row=2, column=3, pady=5, padx=10, sticky="ew")
         
         
-        customtkinter.CTkLabel(master=self.frame1,text="Выберите дату начала конца").grid(row=3, column=0, padx=10,columnspan=4, pady=10, sticky="ew")
+        customtkinter.CTkLabel(master=self.frame1,text="Выберите дату конца").grid(row=3, column=0, padx=10,columnspan=4, pady=10, sticky="ew")
         self.DataEnd_entry = customtkinter.CTkEntry(master=self.frame1, placeholder_text="ГГГГ-ММ-ДД")
         self.DataEnd_entry.grid(row=4, column=1,columnspan=2, padx=10, pady=10, sticky="ew")
         
         self.image_icon_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "calendarICO.png")), size=(20, 20))
-        self.CalendarOpenButton = customtkinter.CTkButton(master=self.frame1, text="Выбрать дату",image=self.image_icon_image, command=lambda: [self.select_date2()])
+        self.CalendarOpenButton = customtkinter.CTkButton(master=self.frame1, text="Выбрать дату",image=self.image_icon_image, command=lambda: [self.select_date(self.DataEnd_entry)])
         self.CalendarOpenButton.grid(row=4, column=3, pady=5, padx=10, sticky="ew")
         
         
@@ -86,79 +87,16 @@ class Reports(customtkinter.CTkToplevel):
         
         self.MakeReport2Button = customtkinter.CTkButton(master=self.frame2, text="Сформировать и открыть отчет", command=lambda: self.MakeReport2())
         self.MakeReport2Button.grid(row=2, column=0,columnspan=4, pady=5, padx=10, sticky="ew")
-    def MakeReport2(self):
-        currVal = self.combobox1.get()
-        data=sql.get_device_info_by_location(currVal)
-        
-        try:
-            # Создание нового документа
-            doc = Document()
 
-            # Заголовок документа
-            title = doc.add_heading('Device Location Report', level=1)
-            title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-            # Добавление таблицы с данными
-            table = doc.add_table(rows=1, cols=4)
-            table.style = 'Table Grid'
-
-            # Заголовки столбцов
-            hdr_cells = table.rows[0].cells
-            hdr_cells[0].text = 'IP'
-            hdr_cells[1].text = 'Location'
-            hdr_cells[2].text = 'Last Repair'
-            hdr_cells[3].text = 'Last Status'
-
-            # Форматирование текста
-            for row in table.rows:
-                for cell in row.cells:
-                    for paragraph in cell.paragraphs:
-                        run = paragraph.runs[0]
-                        font = run.font
-                        font.name = 'Arial'  # Название шрифта
-                        font.size = Pt(11)    # Размер шрифта
-                        font.bold = True      # Жирный шрифт
-                        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # Выравнивание по центру
-
-            # Добавление данных из списка в таблицу
-            for ip, location, last_repair, status in data:
-                row_cells = table.add_row().cells
-                row_cells[0].text = ip
-                row_cells[1].text = location
-                row_cells[2].text = str(last_repair)
-                status_text = 'On' if status else 'Off'
-                row_cells[3].text = status_text
-                # Установка цвета текста в ячейке в зависимости от статуса
-                if status:
-                    color = RGBColor(0, 128, 0)  # Зеленый цвет для "On"
-                else:
-                    color = RGBColor(255, 0, 0)  # Красный цвет для "Off"
-                for paragraph in row_cells[3].paragraphs:
-                    for run in paragraph.runs:
-                        run.font.color.rgb = color
-
-            file_path = 'Device_Location_Report.docx'
-            # Удаление файла, если он существует
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            # Сохранение документа
-            doc.save(file_path)
-            # Открытие файла с помощью программы по умолчанию
-            os.startfile(file_path)
-
-        except Exception as e:
-            print(f"Error creating report: {str(e)}")
-        
-        #отчет по все инфо на выбранный пк
-
-        #отчет по ремонтам за промежуток дат
         
     
         
         
     def create_frame3(self):
         self.frame3 = customtkinter.CTkScrollableFrame(self, height=920, width=450)
-        self.frame3.grid(row=0, rowspan=3, column=2, padx=10, pady=10, sticky="ew")
+        self.grid_columnconfigure(2,weight=1)
+        self.grid_rowconfigure((0,1),weight=1)
+        self.frame3.grid(row=0,column=2,rowspan=3, padx=10, pady=10, sticky="ew")
         self.frame3.grid_columnconfigure((0,1,2), weight=1)
         customtkinter.CTkLabel(master=self.frame3, text="Отчет на выбранный компьютер", fg_color="gray30", font=("Arial", 14)).grid(row=0, columnspan=4, column=0, padx=10, pady=10, sticky="ew")
         self.combobox4= customtkinter.CTkComboBox(master=self.frame3,values=[" "], state="readonly")
@@ -167,8 +105,100 @@ class Reports(customtkinter.CTkToplevel):
         
         self.MakeReport3Button = customtkinter.CTkButton(master=self.frame3, text="Сформировать и открыть отчет", command=lambda: self.MakeReport3())
         self.MakeReport3Button.grid(row=2, column=0,columnspan=4, pady=5, padx=10, sticky="ew")
-        
     
+    
+    def create_frame4(self):
+
+        customtkinter.CTkLabel(master=self.frame3, text="Отчет по ремонтам за промежуток дат", fg_color="gray30", font=("Arial", 14)).grid(row=3, columnspan=4,column=0, padx=10, pady=10, sticky="ew")
+        
+        
+        customtkinter.CTkLabel(master=self.frame3,text="Выберите дату начала периода").grid(row=4, column=0, padx=10,columnspan=4, pady=10, sticky="ew")
+        self.DataStart_entry1 = customtkinter.CTkEntry(master=self.frame3, placeholder_text="ГГГГ-ММ-ДД")
+        self.DataStart_entry1.grid(row=5, column=0,columnspan=3, padx=10, pady=10, sticky="ew")
+        
+        self.image_icon_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "calendarICO.png")), size=(20, 20))
+        self.CalendarOpenButton = customtkinter.CTkButton(master=self.frame3, text="Выбрать дату",image=self.image_icon_image, command=lambda: [self.select_date(self.DataStart_entry1)])
+        self.CalendarOpenButton.grid(row=5, column=3, pady=5, padx=10, sticky="ew")
+        
+        
+        customtkinter.CTkLabel(master=self.frame3,text="Выберите дату конца периода").grid(row=6, column=0, padx=10,columnspan=4, pady=10, sticky="ew")
+        self.DataEnd_entry1 = customtkinter.CTkEntry(master=self.frame3, placeholder_text="ГГГГ-ММ-ДД")
+        self.DataEnd_entry1.grid(row=7, column=0,columnspan=3, padx=10, pady=10, sticky="ew")
+        
+        self.image_icon_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "calendarICO.png")), size=(20, 20))
+        self.CalendarOpenButton = customtkinter.CTkButton(master=self.frame3, text="Выбрать дату",image=self.image_icon_image, command=lambda: [self.select_date(self.DataEnd_entry1)])
+        self.CalendarOpenButton.grid(row=7, column=3, pady=5, padx=10, sticky="ew")
+        
+        self.MakeReport4Button = customtkinter.CTkButton(master=self.frame3, text="Сформировать и открыть отчет", command=lambda: self.MakeReport4())
+        self.MakeReport4Button.grid(row=8, column=0,columnspan=4, pady=5, padx=10, sticky="ew")
+        
+        
+    def MakeReport4(self):
+        date_start = self.DataStart_entry1.get()
+        date_end = self.DataEnd_entry1.get()
+        print(date_start)
+        print(date_end)
+        data=sql.get_repairs_during_period(date_start,date_end)
+        # Создаем новый документ
+        doc = Document()
+
+        # Добавляем заголовок
+        doc.add_heading(f'Отчет по ремонтам c {date_start} по {date_end}', level=1)
+
+        # Создаем таблицу с заголовками
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+
+        hdr_cells[0].text = 'IP'
+        hdr_cells[1].text = 'Имя ПК'
+        hdr_cells[2].text = 'Описание ремонта'
+        hdr_cells[3].text = 'Дата'
+
+        # Добавляем данные в таблицу
+        for item in data:
+            row_cells = table.add_row().cells
+            row_cells[0].text = str(item[1])
+            row_cells[1].text = item[2]
+            row_cells[2].text = item[3]
+            row_cells[3].text = item[4]
+
+        # Сохраняем документ
+        file_path = 'RepairsBDates.docx'
+        # Удаление файла, если он существует
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        # Сохранение документа
+        doc.save(file_path)
+        # Открытие файла с помощью программы по умолчанию
+        os.startfile(file_path)
+        
+        
+        
+    def select_date(self, entry):
+        try:
+            if hasattr(self, 'additionalWIN') and self.additionalWIN.winfo_exists():
+                self.additionalWIN.focus()
+                return
+            self.additionalWIN = customtkinter.CTkToplevel(self)
+            self.additionalWIN.geometry("260x200")
+            self.additionalWIN.focus()
+            self.additionalWIN.title(f"Calendar")
+            self.additionalWIN.focus()
+            maximize_minimize_button.hide(self.additionalWIN)
+            cal = Calendar(self.additionalWIN, selectmode='day', date_pattern="yyyy-mm-dd")
+
+            def set_date(selected_entry):
+                def inner():
+                    selected_date = cal.get_date()
+                    selected_entry.delete(0, 'end')
+                    selected_entry.insert(0, selected_date)
+                    self.additionalWIN.destroy()
+                return inner
+
+            cal.pack()
+            cal.bind('<<CalendarSelected>>', lambda event, entry=entry: set_date(entry)())
+        except Exception as e:
+            print(f"Exception in SelecTData: {e}")
     def MakeReport3(self):
         doc = DocxTemplate("PATTERN_REPORT_FOR_ONE.docx")
         currVal = self.combobox4.get()
@@ -289,15 +319,12 @@ class Reports(customtkinter.CTkToplevel):
         # Сохранение документа
         doc.save(file_path)
         # Открытие файла с помощью программы по умолчанию
-        os.startfile(file_path)
-
-    
+        os.startfile(file_path)    
     def FillComboBoxes4(self):
         ToComboBoxOne = sql.get_basic_info()
         sasha = [str(data[0]) + " | " + str(data[1]) for data in ToComboBoxOne]
         self.combobox4.configure(values=sasha)
         self.update()
-        
     def select_date1(self):
         try:
             if hasattr(self, 'additionalWIN') and self.additionalWIN.winfo_exists():
@@ -318,8 +345,7 @@ class Reports(customtkinter.CTkToplevel):
             cal.pack() 
             cal.bind('<<CalendarSelected>>', lambda event: set_date())
         except Exception as e:
-            print(f"Exception in SelecTData: {e}")       
-            
+            print(f"Exception in SelecTData: {e}")            
     def select_date2(self):
         try:
             if hasattr(self, 'additionalWIN') and self.additionalWIN.winfo_exists():
@@ -341,7 +367,6 @@ class Reports(customtkinter.CTkToplevel):
             cal.bind('<<CalendarSelected>>', lambda event: set_date())
         except Exception as e:
             print(f"Exception in SelecTData: {e}")        
-
     def FillComboBoxes(self):
         ToComboBoxOne = sql.get_basic_info()
         qwe={''} ##все кабинетики (вкладочки)
@@ -356,12 +381,13 @@ class Reports(customtkinter.CTkToplevel):
     def MakeReport1(self):
         date_start = self.DataStart_entry.get()
         date_end = self.DataEnd_entry.get()
-        data = sql.call_PCStatusDuringPeriod_procedure(date_start, date_end)
+        date_start_obj = datetime.strptime(date_start, '%Y-%m-%d')
+        date_end_obj = datetime.strptime(date_end, '%Y-%m-%d')
+        date_start_formatted = date_start_obj.strftime('%Y-%d-%m')
+        date_end_formatted = date_end_obj.strftime('%Y-%d-%m')
 
-        # Создание нового документа
+        data = sql.call_PCStatusDuringPeriod_procedure(date_start_formatted, date_end_formatted)
         doc = Document()
-
-        # Заголовок документа
         title = doc.add_heading('PC Status Report', level=1)
         title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
@@ -412,7 +438,73 @@ class Reports(customtkinter.CTkToplevel):
         doc.save(file_path)
         # Открытие файла с помощью программы по умолчанию
         os.startfile(file_path)
+    def MakeReport2(self):
+        currVal = self.combobox1.get()
+        data=sql.get_device_info_by_location(currVal)
+        
+        try:
+            # Создание нового документа
+            doc = Document()
 
+            # Заголовок документа
+            title = doc.add_heading('Device Location Report', level=1)
+            title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            # Добавление таблицы с данными
+            table = doc.add_table(rows=1, cols=4)
+            table.style = 'Table Grid'
+
+            # Заголовки столбцов
+            hdr_cells = table.rows[0].cells
+            hdr_cells[0].text = 'IP'
+            hdr_cells[1].text = 'Location'
+            hdr_cells[2].text = 'Last Repair'
+            hdr_cells[3].text = 'Last Status'
+
+            # Форматирование текста
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        run = paragraph.runs[0]
+                        font = run.font
+                        font.name = 'Arial'  # Название шрифта
+                        font.size = Pt(11)    # Размер шрифта
+                        font.bold = True      # Жирный шрифт
+                        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # Выравнивание по центру
+
+            # Добавление данных из списка в таблицу
+            for ip, location, last_repair, status in data:
+                row_cells = table.add_row().cells
+                row_cells[0].text = ip
+                row_cells[1].text = location
+                row_cells[2].text = str(last_repair)
+                status_text = 'On' if status else 'Off'
+                row_cells[3].text = status_text
+                # Установка цвета текста в ячейке в зависимости от статуса
+                if status:
+                    color = RGBColor(0, 128, 0)  # Зеленый цвет для "On"
+                else:
+                    color = RGBColor(255, 0, 0)  # Красный цвет для "Off"
+                for paragraph in row_cells[3].paragraphs:
+                    for run in paragraph.runs:
+                        run.font.color.rgb = color
+
+            file_path = 'Device_Location_Report.docx'
+            # Удаление файла, если он существует
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            # Сохранение документа
+            doc.save(file_path)
+            # Открытие файла с помощью программы по умолчанию
+            os.startfile(file_path)
+
+        except Exception as e:
+            print(f"Error creating report: {str(e)}")
+        
+        #отчет по все инфо на выбранный пк
+
+        #отчет по ремонтам за промежуток дат
+        
 if __name__ == "__main__":
     root = tkinter.Tk()
     app = Reports(root)

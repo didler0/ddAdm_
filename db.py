@@ -16,6 +16,31 @@ class SQL:
         except Exception as e:
             print(f"Error establishing connection: {str(e)}")
             
+            
+    def create_repairs_info_view(self):
+        try:
+            # Проверка наличия представления RepairsInfo
+            self.cursor.execute("SELECT COUNT(*) FROM sys.views WHERE name = 'RepairsInfo'")
+            if self.cursor.fetchone()[0] == 0:
+                # Создание представления RepairsInfo (если его нет)
+                self.cursor.execute('''
+                    CREATE VIEW RepairsInfo AS
+                    SELECT r.id AS repair_id,
+                           b.ip,
+                           b.network_name,
+                           r.description AS repair_description,
+                           r.repair_date
+                    FROM dbo.repairs r
+                    INNER JOIN dbo.basic_info b ON r.basic_info_id = b.id
+                    WHERE r.repair_date BETWEEN @start_date AND @end_date;
+                ''')
+                self.connection.commit()
+                print("View RepairsInfo created successfully.")
+        except Exception as e:
+            print(f"Error creating view: {str(e)}")
+
+                
+                
     def check_and_create_PCStatusDuringPeriod_procedure(self):
         try:
             # Проверяем наличие процедуры
@@ -237,7 +262,7 @@ class SQL:
 
             
     
-                
+            self.create_repairs_info_view()
             self.check_and_create_PCStatusDuringPeriod_procedure()
             self.create_trigger()
             self.check_and_create_procedure()
@@ -698,6 +723,24 @@ class SQL:
      except Exception as e:
          print(f"Error fetching data from statuses table: {str(e)}")
 
+    def get_repairs_during_period(self, date_start, date_end):
+        try:
+            query = """
+                SELECT r.id AS repair_id,
+                       b.ip,
+                       b.network_name,
+                       r.description AS repair_description,
+                       r.repair_date
+                FROM dbo.repairs r
+                INNER JOIN dbo.basic_info b ON r.basic_info_id = b.id
+                WHERE r.repair_date BETWEEN '{}' AND '{}'
+            """.format(date_start, date_end)
+    
+            self.cursor.execute(query)
+            rows = self.cursor.fetchall()
+            return rows
+        except Exception as e:
+            print(f"Error fetching repairs during period: {str(e)}")
 
 
 

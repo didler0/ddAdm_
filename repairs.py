@@ -193,25 +193,20 @@ class Repairs(customtkinter.CTkToplevel):
                 CTkMessagebox(title="Ошибка",message="Не выбран компьютер! ", icon="cancel")
                 return
             else:
-                third_elements = [[record[0], record[3]] for sublist in ToComboBoxSec for record in sublist]
-                sasha2=[]
-                print(third_elements)
-                sorted_third_elements = sorted(third_elements, key=lambda x: x[1])
-                print(sorted_third_elements)
-                for text in sorted_third_elements:
-                    sasha2.append(str(text[0])+" | "+str(text[1]))
-                    print(text[1])
-
-#
-                ## Присвоение номера каждой записи
-                #for i, record in enumerate(sorted_data, start=1):
-                #    record_number = i
-                #    print(f"Record {record_number}: {record}")
-                    
-                #sasha2 = [str(data[0]) + " | " + str(data[3]) for data in ToComboBoxSec if data is not None]
-
-                self.combobox2.configure(values=sasha2)
-                self.update()
+                if not ToComboBoxSec[0] or ToComboBoxSec[0]=="":
+                    CTkMessagebox(title="Ошибка",message="Не найдено ремонтов! ", icon="cancel")
+                    return
+                else:
+                    third_elements = [[record[0], record[3]] for sublist in ToComboBoxSec for record in sublist]
+                    sasha2=[]
+                    print(third_elements)
+                    sorted_third_elements = sorted(third_elements, key=lambda x: x[1])
+                    print(sorted_third_elements)
+                    for text in sorted_third_elements:
+                        sasha2.append(str(text[0])+" | "+str(text[1]))
+                        print(text[1])
+                    self.combobox2.configure(values=sasha2)
+                    self.update()
         else:
             return
     
