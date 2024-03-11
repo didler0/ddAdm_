@@ -136,8 +136,6 @@ class Reports(customtkinter.CTkToplevel):
     def MakeReport4(self):
         date_start = self.DataStart_entry1.get()
         date_end = self.DataEnd_entry1.get()
-        print(date_start)
-        print(date_end)
         data=sql.get_repairs_during_period(date_start,date_end)
         # Создаем новый документ
         doc = Document()
@@ -208,11 +206,8 @@ class Reports(customtkinter.CTkToplevel):
         else:
             pass
         basic_data=sql.get_basic_info_by_id(numbers)
-        print(basic_data)
         detail_data=sql.get_detail_info_by_id(basic_data[0])
-        print(detail_data)
         component=sql.get_components_by_id(detail_data[2])
-        print(component)
         
         _inv_numb=detail_data[3]
         _network_name=basic_data[2]
@@ -300,15 +295,10 @@ class Reports(customtkinter.CTkToplevel):
         repairs_list=sql.get_repairs_by_basic_id(numbers)
         
         number_of_tuples = sum(len(sublist) for sublist in repairs_list)
-        print("Количество кортежей внутри списка repairs_list:", number_of_tuples)
-        print("da blyaaa")
+
         table2=doc.add_table(rows=number_of_tuples, cols=2)
         for sublist in repairs_list:
-            for i, rep in enumerate(sublist):
-                print(f"Index: {i}, Value: {rep}")
-                print(str(rep[2]))
-                print(str(rep[3]))
-                
+            for i, rep in enumerate(sublist):               
                 table2.cell(i, 0).text = str(rep[2])
                 table2.cell(i, 1).text = str(rep[3])
             

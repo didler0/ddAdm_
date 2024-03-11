@@ -560,7 +560,27 @@ class SQL:
         except Exception as e:
             print(f"Error deleting detail info: {str(e)}")
       
-      
+    def call_repairs_info_view(self):
+        try:
+            # Проверка наличия представления RepairsInfo
+            self.cursor.execute("SELECT COUNT(*) FROM sys.views WHERE name = 'RepairsInfo'")
+            if self.cursor.fetchone()[0] > 0:
+                # Вызов представления RepairsInfo
+                self.cursor.execute('''
+                    SELECT *
+                    FROM RepairsInfo
+                ''')
+                # Получение результатов
+                results = self.cursor.fetchall()
+                print("View RepairsInfo called successfully.")
+                return results
+            else:
+                print("View RepairsInfo does not exist.")
+                return None
+        except Exception as e:
+            print(f"Error calling view: {str(e)}")
+            return None
+
       
           
     def get_photos_by_basic_id(self, basic_id):

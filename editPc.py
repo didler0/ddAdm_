@@ -175,53 +175,57 @@ class editPC(customtkinter.CTkToplevel):
         
         
     def SaveData(self):
-        currVal = self.combobox1.get()
-        parts = currVal.split('|')  # Разделить строку на подстроки по символу '|'
-        if len(parts) > 0:
-            numbers = parts[0].strip()  # Получить первую подстроку и удалить лишние пробелы
-        #
-        #   BASIC
-        #
-        values_basic = []
-        for widget in self.widgetsDescription:
-            if isinstance(widget, customtkinter.CTkEntry):
-                value = widget.get()  # Получение значения из CTkEntry
-                widget.delete(0,customtkinter.END)
-            elif isinstance(widget, customtkinter.CTkTextbox):
-                value = widget.get("1.0", "end-1c")  # Получение значения из CTkTextbox
-                widget.delete("1.0", "end-1c")
-            else:
-                value = None
-            values_basic.append(value)
-        sql.update_basic_info(numbers,*values_basic)
-        #
-        # COMPONENTS
-        #
-        values_component=[]
-        for widget in self.widgetsComponents:
-            if isinstance(widget, customtkinter.CTkEntry):
-                value = widget.get()
-                widget.delete(0,customtkinter.END)
-            else:
-                value = None
-            values_component.append(value)
-        sql.update_component_info(self.data_comp[0],*values_component)
-        #
-        #   Details
-        #
-        values_detail = []
-        for i, widget in enumerate(self.widgetsDetailDescription):
-            if isinstance(widget, customtkinter.CTkEntry):
-                val = widget.get()
-                widget.delete(0,customtkinter.END)
-            elif isinstance(widget, customtkinter.CTkSwitch):
-                val = widget.get()
-            elif isinstance(widget, customtkinter.CTkTextbox):
-                val = widget.get("1.0", "end-1c")
-                widget.delete("1.0", tkinter.END)
-            values_detail.append(val)
-        sql.update_detail_info(self.data_detail[0],numbers,self.data_comp[0],*values_detail)
-        self.FillComboBoxes()
+        try:
+            currVal = self.combobox1.get()
+            parts = currVal.split('|')  # Разделить строку на подстроки по символу '|'
+            if len(parts) > 0:
+                numbers = parts[0].strip()  # Получить первую подстроку и удалить лишние пробелы
+            #
+            #   BASIC
+            #
+            values_basic = []
+            for widget in self.widgetsDescription:
+                if isinstance(widget, customtkinter.CTkEntry):
+                    value = widget.get()  # Получение значения из CTkEntry
+                    widget.delete(0,customtkinter.END)
+                elif isinstance(widget, customtkinter.CTkTextbox):
+                    value = widget.get("1.0", "end-1c")  # Получение значения из CTkTextbox
+                    widget.delete("1.0", "end-1c")
+                else:
+                    value = None
+                values_basic.append(value)
+            sql.update_basic_info(numbers,*values_basic)
+            #
+            # COMPONENTS
+            #
+            values_component=[]
+            for widget in self.widgetsComponents:
+                if isinstance(widget, customtkinter.CTkEntry):
+                    value = widget.get()
+                    widget.delete(0,customtkinter.END)
+                else:
+                    value = None
+                values_component.append(value)
+            sql.update_component_info(self.data_comp[0],*values_component)
+            #
+            #   Details
+            #
+            values_detail = []
+            for i, widget in enumerate(self.widgetsDetailDescription):
+                if isinstance(widget, customtkinter.CTkEntry):
+                    val = widget.get()
+                    widget.delete(0,customtkinter.END)
+                elif isinstance(widget, customtkinter.CTkSwitch):
+                    val = widget.get()
+                elif isinstance(widget, customtkinter.CTkTextbox):
+                    val = widget.get("1.0", "end-1c")
+                    widget.delete("1.0", tkinter.END)
+                values_detail.append(val)
+            sql.update_detail_info(self.data_detail[0],numbers,self.data_comp[0],*values_detail)
+            self.FillComboBoxes()
+            CTkMessagebox(title="Успех", message="Запись успешно обновлена!", icon="check")
+        except Exception as e:
+            TkMessagebox(title="Ошибка", message="Ошибка при обновлении записи!", icon="cancel")
         
         
         
@@ -230,13 +234,16 @@ class editPC(customtkinter.CTkToplevel):
         id_basic=self.data_detail[1]
         id_comp=self.data_detail[2]
         id_details=self.data_detail[0]
-        sql.delete_statuses_by_basic_info_id(id_basic)
-        sql.delete_detail_info(id_details)
-        sql.delete_photos_by_basic_id(id_basic)
-        sql.delete_basic_info(id_basic)
-        sql.delete_component_info(id_comp)
-        
-        self.FillComboBoxes()
+        try:
+            sql.delete_statuses_by_basic_info_id(id_basic)
+            sql.delete_detail_info(id_details)
+            sql.delete_photos_by_basic_id(id_basic)
+            sql.delete_basic_info(id_basic)
+            sql.delete_component_info(id_comp)
+            self.FillComboBoxes()
+            CTkMessagebox(title="Успех", message="Запись успешно удалена!", icon="check")
+        except Exception as e:
+            CTkMessagebox(title="Ошибка", message="Ошибка удаления!", icon="cancel")
 
     def ClearData(self):
         # Очистка виджетов описания
@@ -272,7 +279,8 @@ class editPC(customtkinter.CTkToplevel):
             
             
             
-            
+#CTkMessagebox(title="Ошибка", message="Ошибка удаления!", icon="cancel")
+#CTkMessagebox(title="Успех", message="Запись успешно удалена!", icon="check")
             
 
 if __name__ == "__main__":
